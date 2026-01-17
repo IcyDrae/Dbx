@@ -1,5 +1,6 @@
 using Dbx.Filesystem;
 using Dbx.Data;
+using Dbx.Core;
 
 namespace Dbx
 {
@@ -91,7 +92,29 @@ namespace Dbx
             }
 
             Console.WriteLine($"Connecting to {connection.Type} database '{connection.Database}' on {connection.Host}:{connection.Port} as {connection.Username}...");
-            // TODO: implement actual database connection
+
+            var Configuration = this.ConfigurationFile.LoadConfiguration();
+
+            try
+            {
+                DatabaseService DatabaseService = new DatabaseService(Configuration, ConnectionName);
+
+                Console.WriteLine($"Connecting to database using connection '{DatabaseService.GetConnectionName()}'...");
+
+                var Tables = DatabaseService.ListTables();
+
+                Console.WriteLine("Tables:");
+
+                foreach (var Table in Tables)
+                {
+                    Console.WriteLine($" - {Table}");
+                }
+            }
+            catch (Exception Exception)
+            {
+                Console.WriteLine("Connection failed:");
+                Console.WriteLine(Exception.Message);
+            }
         }
 
         private void HandleConfig(string[] parameters)
@@ -153,6 +176,12 @@ namespace Dbx
         private void HandleConfigList()
         {
             string? Connections = this.ConfigurationFile.ListConnections();
+
+            if (string.IsNullOrWhiteSpace(Connections))
+            {
+                Console.WriteLine("No available connections.");
+                return;
+            }
 
             Console.WriteLine("Available connections:");
             Console.WriteLine(Connections);

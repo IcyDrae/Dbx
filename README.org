@@ -44,14 +44,14 @@ dbx export users --csv
 
 The project follows a layered architecture:
 
-* CLI Layer
-* Core Logic
-* Database Providers
-* Schema Introspection
-* Output Rendering
-* Security & Encryption
+- CLI Layer
+- Core Logic
+- Database Providers
+- Schema Introspection
+- Output Rendering
+- Security & Encryption
 
-- Disclaimer
+* Disclaimer
 
 Only use this tool on databases you own or have permission to access.
 

@@ -108,6 +108,26 @@ namespace Dbx.Filesystem
 
             return Sb.ToString();
         }
+
+        public Configuration LoadConfiguration()
+        {
+            string path = Path.Combine(DefaultFolderPath, FileName);
+
+            if (!File.Exists(path))
+            {
+                throw new Exception("Configuration file does not exist.");
+            }
+
+            var Json = File.ReadAllText(path);
+            var configuration = JsonSerializer.Deserialize<Configuration>(Json);
+
+            if (configuration == null)
+            {
+                throw new Exception("Configuration file is empty or corrupted.");
+            }
+
+            return configuration;
+        }
     }
 }
 
