@@ -23,6 +23,7 @@ namespace Dbx.Core
             {
                 "mysql" => new MySqlProvider(Connection),
                 "postgres" => new PostgresProvider(Connection),
+                "sqlite" => new SqliteProvider(Connection),
                 _ => throw new Exception("Unsupported database type.")
             };
         }

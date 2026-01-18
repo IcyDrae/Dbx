@@ -2,3 +2,4 @@ bin
 obj
 publish
 TODO.org
+mydb.sqlite
