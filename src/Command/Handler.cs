@@ -63,6 +63,9 @@ namespace Dbx
                 case "config":
                     HandleConfig(parameters);
                     break;
+                case "use":
+                    HandleUse(parameters);
+                    break;
                 case "help":
                     HandleHelp();
                     break;
@@ -185,6 +188,28 @@ namespace Dbx
 
             Console.WriteLine("Available connections:");
             Console.WriteLine(Connections);
+        }
+
+        private void HandleUse(string[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
+                Console.WriteLine("Usage:");
+                Console.WriteLine("  dbx use <connection-name>");
+
+                return;
+            }
+
+            string ConnectionName = parameters[0];
+
+            try
+            {
+                this.ConfigurationFile.SetDefaultConnection(ConnectionName);
+                Console.WriteLine($"Using {ConnectionName} as current database...");
+            }
+            catch (Exception Ex) {
+                Console.WriteLine($"Error: {Ex.Message}");
+            }
         }
 
         private void HandleHelp()

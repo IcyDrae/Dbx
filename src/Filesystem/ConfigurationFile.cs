@@ -128,6 +128,27 @@ namespace Dbx.Filesystem
 
             return configuration;
         }
+
+        public void SetDefaultConnection(string Name)
+        {
+            string path = Path.Combine(DefaultFolderPath, FileName);
+            string Json = File.ReadAllText(path);
+            var Config = JsonSerializer.Deserialize<Configuration>(Json) ?? new Configuration();
+
+            if (!Config.Connections.ContainsKey(Name))
+            {
+                throw new Exception($"Connection {Name} does not exist.");
+            }
+
+            Config.DefaultConnection = Name;
+
+            string UpdatedJson = JsonSerializer.Serialize(Config,
+            new JsonSerializerOptions {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(path, UpdatedJson);
+        }
     }
 }
 

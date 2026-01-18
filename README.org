@@ -33,7 +33,7 @@ Examples:
 
 #+BEGIN_SRC bash
 dbx connect sqlite mydb.db
-dbx tables
+dbx use local-mysql
 dbx describe users
 dbx show users --limit 20
 dbx query "SELECT * FROM users"
