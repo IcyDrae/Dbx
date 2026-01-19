@@ -49,6 +49,11 @@ namespace Dbx.Core
             return this.Provider.DescribeTable(Name);
         }
 
+        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10)
+        {
+            return this.Provider.ListRows(TableName, Page, PageSize);
+        }
+
         public string GetConnectionName() => this.ConnectionName;
     }
 }

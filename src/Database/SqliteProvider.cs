@@ -82,6 +82,32 @@ namespace Dbx.Database
 
             return TableColumn;
         }
+
+        public List<string> ListRows(string tableName, int page = 1, int pageSize = 10)
+        {
+            if (this.SqliteConnection == null || this.SqliteConnection.State != System.Data.ConnectionState.Open)
+                this.Connect();
+
+            var rows = new List<string>();
+            int offset = (page - 1) * pageSize;
+            string sql = $"SELECT * FROM \"{tableName}\" LIMIT @Limit OFFSET @Offset;";
+
+            using var cmd = new SqliteCommand(sql, this.SqliteConnection);
+            cmd.Parameters.AddWithValue("@Limit", pageSize);
+            cmd.Parameters.AddWithValue("@Offset", offset);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var rowValues = new List<string>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                    rowValues.Add(reader[i]?.ToString() ?? "");
+
+                rows.Add(string.Join("  |  ", rowValues));
+            }
+
+            return rows;
+        }
     }
 }
 

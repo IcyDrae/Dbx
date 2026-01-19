@@ -108,6 +108,39 @@ ORDER BY c.ordinal_position;
 
             return TableColumn;
         }
+
+        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10)
+        {
+            if (this.PostgresConnection == null || this.PostgresConnection.State != System.Data.ConnectionState.Open)
+            {
+                this.Connect();
+            }
+
+            List<string> Rows = new List<string>();
+
+            int Offset = (Page - 1) * PageSize;
+            string Sql = $"SELECT * FROM \"{TableName}\" LIMIT @Limit OFFSET @Offset;";
+
+            using NpgsqlCommand Command = new NpgsqlCommand(Sql, this.PostgresConnection);
+            Command.Parameters.AddWithValue("@Limit", PageSize);
+            Command.Parameters.AddWithValue("@Offset", Offset);
+
+            using NpgsqlDataReader Reader = Command.ExecuteReader();
+            
+            while (Reader.Read())
+            {
+                List<string> RowValues = new List<string>();
+
+                for (int i = 0; i < Reader.FieldCount; i++)
+                {
+                    RowValues.Add(Reader[i]?.ToString() ?? "");
+                }
+
+                Rows.Add(string.Join("  |  ", RowValues));
+            }
+
+            return Rows;
+        }
     }
 }
 

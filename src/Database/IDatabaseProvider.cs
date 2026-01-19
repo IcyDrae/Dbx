@@ -8,6 +8,7 @@ namespace Dbx.Database
         List<string> ListTables();
         string RunQuery(string sql);
         List<TableColumn> DescribeTable(string Name);
+        List<string> ListRows(string TableName, int Page, int PageSize);
     }
 }
 

@@ -73,6 +73,9 @@ namespace Dbx
                 case "describe":
                     HandleDescribe(parameters);
                     break;
+                case "list":
+                    HandleListRows(parameters);
+                    break;
                 case "help":
                     HandleHelp();
                     break;
@@ -262,6 +265,70 @@ namespace Dbx
             {
                 Console.WriteLine("Connection failed:");
                 Console.WriteLine(Exception.Message);
+            }
+        }
+
+        private void HandleListRows(string[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
+                Console.WriteLine("Usage:");
+                Console.WriteLine("  dbx list <table-name>");
+                return;
+            }
+
+            string tableName = parameters[0];
+            Console.WriteLine($"Paginating rows in table {tableName}");
+
+            try
+            {
+                Configuration config = this.ConfigurationFile.LoadConfiguration();
+                string defaultConnectionName = config.DefaultConnection;
+                DatabaseService databaseService = new DatabaseService(config, defaultConnectionName);
+
+                int pageSize = 10;
+                int page = 1; // PostgreSQL ListRows uses 1-based pages
+                bool running = true;
+
+                while (running)
+                {
+                    Console.Clear();
+                    List<string> rows = databaseService.ListRows(tableName, page, pageSize);
+
+                    if (rows.Count == 0)
+                    {
+                        Console.WriteLine("No rows found.");
+                        running = false;
+                        break;
+                    }
+
+                    Console.WriteLine($"Showing page {page} (first {rows.Count} rows) from table {tableName}\n");
+
+                    foreach (var row in rows)
+                    {
+                        Console.WriteLine(row);
+                    }
+
+                    Console.WriteLine($"\n[n = next | p = previous | q = quit]");
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.N:
+                            if (rows.Count == pageSize) page++; // only advance if the page was full
+                            break;
+                        case ConsoleKey.P:
+                            if (page > 1) page--;
+                            break;
+                        case ConsoleKey.Q:
+                            running = false;
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error listing rows: {ex.Message}");
             }
         }
 
