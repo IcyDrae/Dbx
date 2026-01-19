@@ -32,6 +32,8 @@ to GUI database tools while improving backend and systems programming skills.
 Examples:
 
 #+BEGIN_SRC bash
+dbx config
+dbx config add <name> <type> <host> <port> <db> <user> <password>
 dbx connect sqlite mydb.db
 dbx use local-mysql
 dbx describe users
