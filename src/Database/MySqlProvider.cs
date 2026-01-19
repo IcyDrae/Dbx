@@ -72,12 +72,19 @@ namespace Dbx.Database
 
             while (Reader.Read())
             {
+                string Key = Reader["Key"].ToString() ?? "";
+                
+                if (Key == "MUL")
+                {
+                    Key = "FK";
+                }
+
                 TableColumn.Add(new TableColumn
                 {
                     Name = Reader["Field"]?.ToString() ?? "",
                     Type = Reader["Type"]?.ToString() ?? "",
                     Nullable = Reader["Null"]?.ToString() ?? "",
-                    Key = Reader["Key"]?.ToString() ?? "",
+                    Key = Key,
                     Default = Reader["Default"]?.ToString() ?? ""
                 });
             }
