@@ -1,5 +1,7 @@
 using Dbx.Data;
+using Dbx.Output;
 using MySql.Data.MySqlClient;
+using System.Text;
 
 namespace Dbx.Database
 {
@@ -58,6 +60,29 @@ namespace Dbx.Database
             this.MySqlConnection?.Close();
 
             return Result?.ToString() ?? "No result.";
+        }
+
+        public List<TableColumn> DescribeTable(string Name)
+        {
+            this.Connect();
+            List<TableColumn> TableColumn = new List<TableColumn>();
+
+            MySqlCommand command = new MySqlCommand($"DESCRIBE {Name};", this.MySqlConnection);
+            using var Reader = command.ExecuteReader();
+
+            while (Reader.Read())
+            {
+                TableColumn.Add(new TableColumn
+                {
+                    Name = Reader["Field"]?.ToString() ?? "",
+                    Type = Reader["Type"]?.ToString() ?? "",
+                    Nullable = Reader["Null"]?.ToString() ?? "",
+                    Key = Reader["Key"]?.ToString() ?? "",
+                    Default = Reader["Default"]?.ToString() ?? ""
+                });
+            }
+
+            return TableColumn;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Dbx.Data;
+using Dbx.Output;
 using Microsoft.Data.Sqlite;
 
 namespace Dbx.Database
@@ -55,6 +56,31 @@ namespace Dbx.Database
             this.SqliteConnection?.Close();
 
             return Result?.ToString() ?? "No result.";
+        }
+
+        public List<TableColumn> DescribeTable(string Name)
+        {
+            this.Connect();
+            List<TableColumn> TableColumn = new List<TableColumn>();
+
+            string Sql = $"PRAGMA table_info({Name})";
+
+            SqliteCommand command = new SqliteCommand(Sql, this.SqliteConnection);
+            using var Reader = command.ExecuteReader();
+
+            while (Reader.Read())
+            {
+                TableColumn.Add(new TableColumn
+                {
+                    Name = Reader["name"]?.ToString() ?? "",
+                    Type = Reader["type"]?.ToString() ?? "",
+                    Nullable = (Convert.ToInt32(Reader["notnull"]) == 0) ? "YES" : "NO",
+                    Key = (Convert.ToInt32(Reader["pk"]) == 1) ? "PRI" : "",
+                    Default = Reader["dflt_value"]?.ToString() ?? ""
+                });
+            }
+
+            return TableColumn;
         }
     }
 }

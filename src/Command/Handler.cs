@@ -1,6 +1,7 @@
 using Dbx.Filesystem;
 using Dbx.Data;
 using Dbx.Core;
+using Dbx.Output;
 
 namespace Dbx
 {
@@ -65,6 +66,9 @@ namespace Dbx
                     break;
                 case "use":
                     HandleUse(parameters);
+                    break;
+                case "describe":
+                    HandleDescribe(parameters);
                     break;
                 case "help":
                     HandleHelp();
@@ -209,6 +213,37 @@ namespace Dbx
             }
             catch (Exception Ex) {
                 Console.WriteLine($"Error: {Ex.Message}");
+            }
+        }
+
+        private void HandleDescribe(string[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
+                Console.WriteLine("Usage:");
+                Console.WriteLine("  dbx describe <table-name>");
+
+                return;
+            }
+
+            Configuration Config = this.ConfigurationFile.LoadConfiguration();
+            string DefaultConnectionName = Config.DefaultConnection;
+            string TableName = parameters[0];
+
+            Console.WriteLine($"Describing {TableName} table from connection {DefaultConnectionName} ...");
+
+            try
+            {
+                DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
+                var Columns = DatabaseService.DescribeTable(TableName);
+                Formatter Formatter = new Formatter();
+
+                Console.WriteLine(Formatter.FormatTable(Columns, TableName));
+            }
+            catch (Exception Exception)
+            {
+                Console.WriteLine("Connection failed:");
+                Console.WriteLine(Exception.Message);
             }
         }
 

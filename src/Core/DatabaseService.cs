@@ -1,5 +1,6 @@
 using Dbx.Database;
 using Dbx.Data;
+using Dbx.Output;
 
 namespace Dbx.Core
 {
@@ -41,6 +42,11 @@ namespace Dbx.Core
         public List<string> ListTables()
         {
             return this.Provider.ListTables();
+        }
+
+        public List<TableColumn> DescribeTable(string Name)
+        {
+            return this.Provider.DescribeTable(Name);
         }
 
         public string GetConnectionName() => this.ConnectionName;

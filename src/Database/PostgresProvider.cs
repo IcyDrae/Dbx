@@ -1,4 +1,5 @@
 using Dbx.Data;
+using Dbx.Output;
 using Npgsql;
 
 namespace Dbx.Database
@@ -59,6 +60,53 @@ namespace Dbx.Database
             var Result = Command.ExecuteScalar();
 
             return Result?.ToString() ?? "No result.";
+        }
+
+        public List<TableColumn> DescribeTable(string Name)
+        {
+            this.Connect();
+            List<TableColumn> TableColumn = new List<TableColumn>();
+
+            string Sql = @"
+SELECT
+    c.column_name,
+    c.data_type,
+    c.is_nullable,
+    CASE
+        WHEN tc.constraint_type = 'PRIMARY KEY' THEN 'PRI'
+        WHEN tc.constraint_type = 'FOREIGN KEY' THEN 'FK'
+        WHEN tc.constraint_type = 'UNIQUE' THEN 'UNI'
+        ELSE ''
+    END AS key_column,
+    c.column_default
+FROM information_schema.columns AS c
+LEFT JOIN information_schema.key_column_usage AS kcu
+       ON c.table_name = kcu.table_name
+      AND c.column_name = kcu.column_name
+LEFT JOIN information_schema.table_constraints AS tc
+       ON kcu.constraint_name = tc.constraint_name
+      AND kcu.table_name = tc.table_name
+WHERE c.table_name = @Name
+ORDER BY c.ordinal_position;
+    ";
+
+            NpgsqlCommand command = new NpgsqlCommand(Sql, this.PostgresConnection);
+            command.Parameters.AddWithValue("@Name", Name);
+            using var Reader = command.ExecuteReader();
+
+            while (Reader.Read())
+            {
+                TableColumn.Add(new TableColumn
+                {
+                    Name = Reader["column_name"]?.ToString() ?? "",
+                    Type = Reader["data_type"]?.ToString() ?? "",
+                    Nullable = Reader["is_nullable"]?.ToString() ?? "",
+                    Key = Reader["key_column"].ToString() ?? "",
+                    Default = Reader["column_default"]?.ToString() ?? "",
+                });
+            }
+
+            return TableColumn;
         }
     }
 }
