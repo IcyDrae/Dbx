@@ -76,7 +76,7 @@ namespace Dbx.Database
                 
                 if (Key == "MUL")
                 {
-                    Key = "FK";
+                    Key = "MUL -> FK";
                 }
 
                 TableColumn.Add(new TableColumn
