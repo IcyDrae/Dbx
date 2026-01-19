@@ -67,6 +67,9 @@ namespace Dbx
                 case "use":
                     HandleUse(parameters);
                     break;
+                case "tables":
+                    HandleShowTables();
+                    break;
                 case "describe":
                     HandleDescribe(parameters);
                     break;
@@ -213,6 +216,21 @@ namespace Dbx
             }
             catch (Exception Ex) {
                 Console.WriteLine($"Error: {Ex.Message}");
+            }
+        }
+
+        private void HandleShowTables()
+        {
+            Configuration Config = this.ConfigurationFile.LoadConfiguration();
+            string DefaultConnectionName = Config.DefaultConnection;
+
+            List<string> Tables = new DatabaseService(Config, DefaultConnectionName).ListTables();
+
+            Console.WriteLine($"Showing tables for database {DefaultConnectionName}");
+
+            foreach (string Table in Tables)
+            {
+                Console.WriteLine($"  {Table}");
             }
         }
 
