@@ -117,28 +117,33 @@ namespace Dbx.Database
             return rows;
         }
 
-        public List<string> Query(string Query)
+        public List<Dictionary<string, string>> Query(string Query)
         {
             if (this.SqliteConnection == null || this.SqliteConnection.State != System.Data.ConnectionState.Open)
             {
                 this.Connect();
             }
 
-            List<string> rows = new List<string>();
+            List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
 
             using var command = new SqliteCommand(Query, this.SqliteConnection);
             using var reader = command.ExecuteReader();
 
+            var columnNames = Enumerable.Range(0, reader.FieldCount)
+                                .Select(i => reader.GetName(i))
+                                .ToArray();
+
             while (reader.Read())
             {
-                List<string> values = new List<string>();
+                var row = new Dictionary<string, string>();
                 for (int i = 0; i < reader.FieldCount; i++)
-                    values.Add(reader[i]?.ToString() ?? "");
-
-                rows.Add(string.Join("  |  ", values));
+                {
+                    row[columnNames[i]] = reader[i]?.ToString() ?? "";
+                }
+                result.Add(row);
             }
 
-            return rows;
+            return result;
         }
     }
 }

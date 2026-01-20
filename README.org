@@ -41,6 +41,8 @@ dbx describe users
 dbx list users
 dbx list users --where="first_name=Joe"
 dbx query "SELECT * FROM users"
+dbx query "SELECT * FROM users" --csv # Export to csv
+dbx query "SELECT * FROM users" --json # Export to json
 dbx history
 dbx history 2 # Run the second command from the history
 dbx export users --csv

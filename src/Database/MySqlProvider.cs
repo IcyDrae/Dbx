@@ -131,14 +131,14 @@ namespace Dbx.Database
             return Rows;
         }
 
-        public List<string> Query(string Query)
+        public List<Dictionary<string, string>> Query(string Query)
         {
             if (this.MySqlConnection == null || this.MySqlConnection.State != System.Data.ConnectionState.Open)
             {
                 this.Connect();
             }
 
-            List<string> Rows = new List<string>();
+            var Rows = new List<Dictionary<string, string>>();
 
             using MySqlCommand Command = new MySqlCommand(Query, this.MySqlConnection);
 
@@ -147,18 +147,27 @@ namespace Dbx.Database
                 using MySqlDataReader Reader = Command.ExecuteReader();
                 while (Reader.Read())
                 {
-                    List<string> Values = new List<string>();
+                    var row = new Dictionary<string, string>();
+
                     for (int i = 0; i < Reader.FieldCount; i++)
                     {
-                        Values.Add(Reader[i]?.ToString() ?? "");
+                        string columnName = Reader.GetName(i);
+                        string value = Reader[i]?.ToString() ?? "";
+
+                        row[columnName] = value;
                     }
-                    Rows.Add(string.Join("  |  ", Values));
+
+                    Rows.Add(row);
                 }
             }
             else
             {
-                int Affected = Command.ExecuteNonQuery();
-                Rows.Add($"Query executed successfully. {Affected} rows affected.");
+                int affected = Command.ExecuteNonQuery();
+
+                Rows.Add(new Dictionary<string, string>
+                {
+                    { "result", $"Query executed successfully. {affected} rows affected." }
+                });
             }
 
             return Rows;

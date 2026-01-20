@@ -9,7 +9,7 @@ namespace Dbx.Database
         string RunQuery(string sql);
         List<TableColumn> DescribeTable(string Name);
         List<string> ListRows(string TableName, int Page, int PageSize, string? WhereClause);
-        List<string> Query(string Query);
+        List<Dictionary<string, string>> Query(string Query);
     }
 }
 

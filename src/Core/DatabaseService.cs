@@ -54,7 +54,7 @@ namespace Dbx.Core
             return this.Provider.ListRows(TableName, Page, PageSize, WhereClause);
         }
 
-        public List<string> Query(string Query)
+        public List<Dictionary<string, string>> Query(string Query)
         {
             return this.Provider.Query(Query);
         }

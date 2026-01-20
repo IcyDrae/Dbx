@@ -357,21 +357,24 @@ namespace Dbx
             if (parameters.Length == 0)
             {
                 Console.WriteLine("Usage:");
-                Console.WriteLine("  dbx query \"SELECT * FROM users\"");
+                Console.WriteLine("  dbx query \"SELECT * FROM users\" [--csv] [--json]");
 
                 return;
             }
 
             Configuration Config = this.ConfigurationFile.LoadConfiguration();
             string DefaultConnectionName = Config.DefaultConnection;
-            string Query = parameters[0];
+            bool exportCsv = parameters.Contains("--csv");
+            bool exportJson = parameters.Contains("--json");
+
+            string Query = string.Join(" ", parameters.Where(p => p != "--csv" && p != "--json"));
 
             this.SaveQueryToHistory(Query);
 
             try
             {
                 DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
-                List<string> Result = DatabaseService.Query(Query);
+                List<Dictionary<string, string>> Result = DatabaseService.Query(Query);
 
                 if (Result.Count == 0)
                 {
@@ -379,9 +382,39 @@ namespace Dbx
                 }
                 else
                 {
-                    foreach (string Row in Result)
+                    foreach (Dictionary<string, string> Row in Result)
                     {
-                        Console.WriteLine(Row);
+                        foreach (var kv in Row)
+                        {
+                            Console.Write($"{kv.Key}: {kv.Value}  |  ");
+                        }
+                        Console.WriteLine();
+                    }
+
+                    if (exportJson)
+                    {
+                        string jsonFile = $"export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json";
+                        string json = System.Text.Json.JsonSerializer.Serialize(Result, new 
+                                      System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                        File.WriteAllText(jsonFile, json);
+                        Console.WriteLine($"Exported to {jsonFile}");
+                    }
+
+                    if (exportCsv)
+                    {
+                        string csvFile = $"export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+                        var csvLines = new List<string>();
+                        if (Result.Count > 0)
+                        {
+                            // header
+                            csvLines.Add(string.Join(",", Result[0].Keys));
+                            foreach (var row in Result)
+                            {
+                                csvLines.Add(string.Join(",", row.Values.Select(v => $"\"{v.Replace("\"", "\"\"")}\"")));
+                            }
+                        }
+                        File.WriteAllLines(csvFile, csvLines);
+                        Console.WriteLine($"Exported to {csvFile}");
                     }
                 }
             }
@@ -389,8 +422,6 @@ namespace Dbx
             {
                 Console.WriteLine($"There was an error: {Ex.Message}");
             }
-
-            Console.WriteLine();
         }
 
         private void HandleHistory(string[] parameters)
@@ -438,7 +469,7 @@ namespace Dbx
                 Console.WriteLine($"Query at position {RequestedPosition}: {Query}");
 
                 DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
-                List<string> Result = DatabaseService.Query(Query);
+                List<Dictionary<string, string>> Result = DatabaseService.Query(Query);
 
                 if (Result.Count == 0)
                 {
@@ -446,9 +477,13 @@ namespace Dbx
                 }
                 else
                 {
-                    foreach (string Row in Result)
+                    foreach (var row in Result)
                     {
-                        Console.WriteLine(Row);
+                        foreach (var kv in row)
+                        {
+                            Console.Write($"{kv.Key}: {kv.Value}  |  ");
+                        }
+                        Console.WriteLine();
                     }
                 }
             }

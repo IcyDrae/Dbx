@@ -150,14 +150,14 @@ ORDER BY c.ordinal_position;
             return Rows;
         }
 
-        public List<string> Query(string Query)
+        public List<Dictionary<string, string>> Query(string Query)
         {
             if (this.PostgresConnection == null || this.PostgresConnection.State != System.Data.ConnectionState.Open)
             {
                 this.Connect();
             }
 
-            List<string> rows = new List<string>();
+            var rows = new List<Dictionary<string, string>>();
 
             using var command = new NpgsqlCommand(Query, this.PostgresConnection);
 
@@ -167,17 +167,27 @@ ORDER BY c.ordinal_position;
                 using var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    List<string> values = new List<string>();
-                    for (int i = 0; i < reader.FieldCount; i++)
-                        values.Add(reader[i]?.ToString() ?? "");
+                    var row = new Dictionary<string, string>();
 
-                    rows.Add(string.Join("  |  ", values));
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        string columnName = reader.GetName(i);
+                        string value = reader[i]?.ToString() ?? "";
+
+                        row[columnName] = value;
+                    }
+
+                    rows.Add(row);
                 }
             }
             else
             {
                 int affected = command.ExecuteNonQuery();
-                rows.Add($"Query executed successfully. {affected} rows affected.");
+
+                rows.Add(new Dictionary<string, string>
+                {
+                    { "result", $"Query executed successfully. {affected} rows affected." }
+                });
             }
 
             return rows;
