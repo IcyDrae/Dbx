@@ -14,8 +14,7 @@ The tool focuses on fast navigation, clean output, and developer productivity.
 
 - Connect to SQLite, PostgreSQL, MySQL
 - Browse tables and schemas
-- Inspect columns and indexes
-- View and filter rows
+- View and paginate rows
 - Run custom SQL queries
 - Export data to CSV / JSON
 - Visualize table relationships
@@ -45,6 +44,7 @@ dbx query "SELECT * FROM users" --csv # Export to csv
 dbx query "SELECT * FROM users" --json # Export to json
 dbx history
 dbx history 2 # Run the second command from the history
+dbx visualize
 dbx export users --csv
 #+END_SRC
 

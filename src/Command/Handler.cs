@@ -83,6 +83,9 @@ namespace Dbx
                 case "history":
                     HandleHistory(parameters);
                     break;
+                case "visualize":
+                    HandleVisualize();
+                    break;
                 case "help":
                     HandleHelp();
                     break;
@@ -505,6 +508,55 @@ namespace Dbx
             {
                 Console.WriteLine("Invalid input. Usage: dbx history <number>");
             }
+        }
+
+        private void HandleVisualize()
+        {
+            Configuration Configuration = this.ConfigurationFile.LoadConfiguration();
+            string DefaultConnectionName = Configuration.DefaultConnection;
+
+            string Query = @"
+SELECT 
+  TABLE_NAME,
+  COLUMN_NAME,
+  REFERENCED_TABLE_NAME,
+  REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = DATABASE()
+  AND REFERENCED_TABLE_NAME IS NOT NULL;
+";
+
+            try
+            {
+                DatabaseService DatabaseService = new DatabaseService(Configuration, DefaultConnectionName);
+                var Result = DatabaseService.Query(Query);
+
+                if (Result.Count == 0)
+                {
+                    Console.WriteLine("No relationships found.");
+                    return;
+                }
+
+                Console.WriteLine("TABLE RELATIONSHIPS\n");
+                var grouped = Result.GroupBy(r => r["TABLE_NAME"]);
+
+                foreach (var group in grouped)
+                {
+                    Console.WriteLine(group.Key);
+
+                    foreach (var row in group)
+                    {
+                        Console.WriteLine($"  {row["COLUMN_NAME"]} -> {row["REFERENCED_TABLE_NAME"]}.{row["REFERENCED_COLUMN_NAME"]}");
+                    }
+
+                    Console.WriteLine();
+                }
+            }
+            catch (Exception Ex)
+            {
+                Console.WriteLine($"Error: {Ex.Message}");
+            }
+
         }
 
         private void HandleHelp()
