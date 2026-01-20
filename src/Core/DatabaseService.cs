@@ -49,9 +49,14 @@ namespace Dbx.Core
             return this.Provider.DescribeTable(Name);
         }
 
-        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10, string WhereClause = null)
+        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10, string WhereClause = "")
         {
             return this.Provider.ListRows(TableName, Page, PageSize, WhereClause);
+        }
+
+        public List<string> Query(string Query)
+        {
+            return this.Provider.Query(Query);
         }
 
         public string GetConnectionName() => this.ConnectionName;

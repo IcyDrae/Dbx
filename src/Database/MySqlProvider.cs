@@ -131,6 +131,38 @@ namespace Dbx.Database
             return Rows;
         }
 
+        public List<string> Query(string Query)
+        {
+            if (this.MySqlConnection == null || this.MySqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                this.Connect();
+            }
+
+            List<string> Rows = new List<string>();
+
+            using MySqlCommand Command = new MySqlCommand(Query, this.MySqlConnection);
+
+            if (Query.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+            {
+                using MySqlDataReader Reader = Command.ExecuteReader();
+                while (Reader.Read())
+                {
+                    List<string> Values = new List<string>();
+                    for (int i = 0; i < Reader.FieldCount; i++)
+                    {
+                        Values.Add(Reader[i]?.ToString() ?? "");
+                    }
+                    Rows.Add(string.Join("  |  ", Values));
+                }
+            }
+            else
+            {
+                int Affected = Command.ExecuteNonQuery();
+                Rows.Add($"Query executed successfully. {Affected} rows affected.");
+            }
+
+            return Rows;
+        }
     }
 }
 

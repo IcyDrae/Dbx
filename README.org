@@ -39,7 +39,7 @@ dbx use local-mysql
 dbx tables
 dbx describe users
 dbx list users
-dbx show users --limit 20
+dbx list users --where="first_name=Joe"
 dbx query "SELECT * FROM users"
 dbx export users --csv
 #+END_SRC

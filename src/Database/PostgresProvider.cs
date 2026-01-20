@@ -149,6 +149,39 @@ ORDER BY c.ordinal_position;
 
             return Rows;
         }
+
+        public List<string> Query(string Query)
+        {
+            if (this.PostgresConnection == null || this.PostgresConnection.State != System.Data.ConnectionState.Open)
+            {
+                this.Connect();
+            }
+
+            List<string> rows = new List<string>();
+
+            using var command = new NpgsqlCommand(Query, this.PostgresConnection);
+
+            // Check if it's a SELECT query
+            if (Query.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+            {
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    List<string> values = new List<string>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                        values.Add(reader[i]?.ToString() ?? "");
+
+                    rows.Add(string.Join("  |  ", values));
+                }
+            }
+            else
+            {
+                int affected = command.ExecuteNonQuery();
+                rows.Add($"Query executed successfully. {affected} rows affected.");
+            }
+
+            return rows;
+        }
     }
 }
 

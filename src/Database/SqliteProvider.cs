@@ -116,6 +116,30 @@ namespace Dbx.Database
 
             return rows;
         }
+
+        public List<string> Query(string Query)
+        {
+            if (this.SqliteConnection == null || this.SqliteConnection.State != System.Data.ConnectionState.Open)
+            {
+                this.Connect();
+            }
+
+            List<string> rows = new List<string>();
+
+            using var command = new SqliteCommand(Query, this.SqliteConnection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                List<string> values = new List<string>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                    values.Add(reader[i]?.ToString() ?? "");
+
+                rows.Add(string.Join("  |  ", values));
+            }
+
+            return rows;
+        }
     }
 }
 

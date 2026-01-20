@@ -76,6 +76,9 @@ namespace Dbx
                 case "list":
                     HandleListRows(parameters);
                     break;
+                case "query":
+                    HandleQuery(parameters);
+                    break;
                 case "help":
                     HandleHelp();
                     break;
@@ -279,7 +282,7 @@ namespace Dbx
             }
 
             string tableName = parameters[0];
-            string? WhereClause = null;
+            string WhereClause = "";
 
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -344,6 +347,45 @@ namespace Dbx
             {
                 Console.WriteLine($"Error listing rows: {ex.Message}");
             }
+        }
+
+        private void HandleQuery(string[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
+                Console.WriteLine("Usage:");
+                Console.WriteLine("  dbx query \"SELECT * FROM users\"");
+
+                return;
+            }
+
+            Configuration Config = this.ConfigurationFile.LoadConfiguration();
+            string DefaultConnectionName = Config.DefaultConnection;
+            string Query = parameters[0];
+
+            try
+            {
+                DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
+                List<string> Result = DatabaseService.Query(Query);
+
+                if (Result.Count == 0)
+                {
+                    Console.WriteLine("Query executed successfully. No rows returned.");
+                }
+                else
+                {
+                    foreach (string Row in Result)
+                    {
+                        Console.WriteLine(Row);
+                    }
+                }
+            }
+            catch (Exception Ex)
+            {
+                Console.WriteLine($"There was an error: {Ex.Message}");
+            }
+
+            Console.WriteLine();
         }
 
         private void HandleHelp()
