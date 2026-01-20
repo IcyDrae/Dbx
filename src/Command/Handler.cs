@@ -274,11 +274,25 @@ namespace Dbx
             {
                 Console.WriteLine("Usage:");
                 Console.WriteLine("  dbx list <table-name>");
+                Console.WriteLine("  dbx list <table-name> --where \"first_name=userName\"");
                 return;
             }
 
             string tableName = parameters[0];
-            Console.WriteLine($"Paginating rows in table {tableName}");
+            string? WhereClause = null;
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i] == "--where" && i + 1 < parameters.Length)
+                {
+                    WhereClause = parameters[i + 1];
+                    i++;
+                }
+                else if (parameters[i].StartsWith("--where="))
+                {
+                    WhereClause = parameters[i].Substring("--where=".Length);
+                }
+            }
 
             try
             {
@@ -293,7 +307,7 @@ namespace Dbx
                 while (running)
                 {
                     Console.Clear();
-                    List<string> rows = databaseService.ListRows(tableName, page, pageSize);
+                    List<string> rows = databaseService.ListRows(tableName, page, pageSize, WhereClause);
 
                     if (rows.Count == 0)
                     {

@@ -83,16 +83,24 @@ namespace Dbx.Database
             return TableColumn;
         }
 
-        public List<string> ListRows(string tableName, int page = 1, int pageSize = 10)
+        public List<string> ListRows(string tableName, int page = 1, int pageSize = 10, string? WhereClause = null)
         {
             if (this.SqliteConnection == null || this.SqliteConnection.State != System.Data.ConnectionState.Open)
                 this.Connect();
 
             var rows = new List<string>();
             int offset = (page - 1) * pageSize;
-            string sql = $"SELECT * FROM \"{tableName}\" LIMIT @Limit OFFSET @Offset;";
+            
+            string Sql = $"SELECT * FROM `{tableName}`";
 
-            using var cmd = new SqliteCommand(sql, this.SqliteConnection);
+            if (!string.IsNullOrWhiteSpace(WhereClause))
+            {
+                Sql += " WHERE " + WhereClause;
+            }
+
+            Sql += " LIMIT @Limit OFFSET @Offset;";
+
+            using var cmd = new SqliteCommand(Sql, this.SqliteConnection);
             cmd.Parameters.AddWithValue("@Limit", pageSize);
             cmd.Parameters.AddWithValue("@Offset", offset);
 

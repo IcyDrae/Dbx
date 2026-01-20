@@ -92,7 +92,7 @@ namespace Dbx.Database
             return TableColumn;
         }
 
-        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10)
+        public List<string> ListRows(string TableName, int Page = 1, int PageSize = 10, string? WhereClause = null)
         {
             if (this.MySqlConnection == null || this.MySqlConnection.State != System.Data.ConnectionState.Open)
             {
@@ -102,7 +102,15 @@ namespace Dbx.Database
             List<string> Rows = new List<string>();
 
             int Offset = (Page - 1) * PageSize;
-            string Sql = $"SELECT * FROM `{TableName}` LIMIT @Limit OFFSET @Offset;";
+            
+            string Sql = $"SELECT * FROM `{TableName}`";
+
+            if (!string.IsNullOrWhiteSpace(WhereClause))
+            {
+                Sql += " WHERE " + WhereClause;
+            }
+
+            Sql += " LIMIT @Limit OFFSET @Offset;";
 
             using MySqlCommand Command = new MySqlCommand(Sql, this.MySqlConnection);
             Command.Parameters.AddWithValue("@Limit", PageSize);
