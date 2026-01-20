@@ -80,7 +80,7 @@ namespace Dbx
                     HandleQuery(parameters);
                     break;
                 case "history":
-                    HandleHistory();
+                    HandleHistory(parameters);
                     break;
                 case "help":
                     HandleHelp();
@@ -393,7 +393,7 @@ namespace Dbx
             Console.WriteLine();
         }
 
-        private void HandleHistory()
+        private void HandleHistory(string[] parameters)
         {
             string historyPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
@@ -407,12 +407,54 @@ namespace Dbx
                 return;
             }
 
-            string[] lines = File.ReadAllLines(historyPath);
+            List<string> lines = File.ReadAllLines(historyPath).ToList();
 
-            Console.WriteLine("Query History:");
-            foreach (var line in lines.Reverse()) // show newest first
+            if (parameters.Length == 0)
             {
-                Console.WriteLine(line);
+                int Position = 0;
+                Console.WriteLine("Query History:");
+                foreach (var line in lines.Reverse<string>()) // show newest first
+                {
+                    Position++;
+                    Console.WriteLine($"{Position}: {line}");
+                }
+
+                return;
+            }
+
+            if (int.TryParse(parameters[0], out int RequestedPosition))
+            {
+                if (RequestedPosition <= 0 || RequestedPosition > lines.Count)
+                {
+                    Console.WriteLine("Invalid history position.");
+                    return;
+                }
+
+                Configuration Config = this.ConfigurationFile.LoadConfiguration();
+                string DefaultConnectionName = Config.DefaultConnection;
+
+                string FullLine = lines.Reverse<string>().ElementAt(RequestedPosition - 1);
+                string Query = FullLine.Split("|", 2)[1].Trim();
+                Console.WriteLine($"Query at position {RequestedPosition}: {Query}");
+
+                DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
+                List<string> Result = DatabaseService.Query(Query);
+
+                if (Result.Count == 0)
+                {
+                    Console.WriteLine("Query executed successfully. No rows returned.");
+                }
+                else
+                {
+                    foreach (string Row in Result)
+                    {
+                        Console.WriteLine(Row);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Usage: dbx history <number>");
             }
         }
 
