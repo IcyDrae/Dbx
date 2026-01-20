@@ -79,6 +79,9 @@ namespace Dbx
                 case "query":
                     HandleQuery(parameters);
                     break;
+                case "history":
+                    HandleHistory();
+                    break;
                 case "help":
                     HandleHelp();
                     break;
@@ -363,6 +366,8 @@ namespace Dbx
             string DefaultConnectionName = Config.DefaultConnection;
             string Query = parameters[0];
 
+            this.SaveQueryToHistory(Query);
+
             try
             {
                 DatabaseService DatabaseService = new DatabaseService(Config, DefaultConnectionName);
@@ -388,6 +393,29 @@ namespace Dbx
             Console.WriteLine();
         }
 
+        private void HandleHistory()
+        {
+            string historyPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "dbx-config",
+                "history.txt"
+            );
+
+            if (!File.Exists(historyPath))
+            {
+                Console.WriteLine("No query history found.");
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(historyPath);
+
+            Console.WriteLine("Query History:");
+            foreach (var line in lines.Reverse()) // show newest first
+            {
+                Console.WriteLine(line);
+            }
+        }
+
         private void HandleHelp()
         {
             Console.WriteLine("Dbx - Commands:");
@@ -410,6 +438,19 @@ namespace Dbx
             Console.WriteLine("Examples:");
             Console.WriteLine("  dbx config");
             Console.WriteLine("  dbx connect local-postgres");
+        }
+
+        private void SaveQueryToHistory(string Query)
+        {
+            string HistoryPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "dbx-config",
+                "history.txt"
+            );
+
+            Directory.CreateDirectory(Path.GetDirectoryName(HistoryPath)!);
+
+            File.AppendAllText(HistoryPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {Query}\n");
         }
     }
 }

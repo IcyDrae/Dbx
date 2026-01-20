@@ -41,6 +41,7 @@ dbx describe users
 dbx list users
 dbx list users --where="first_name=Joe"
 dbx query "SELECT * FROM users"
+dbx history
 dbx export users --csv
 #+END_SRC
 
