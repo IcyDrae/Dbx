@@ -2,6 +2,7 @@ using Dbx.Filesystem;
 using Dbx.Data;
 using Dbx.Core;
 using Dbx.Output;
+using System.Text.RegularExpressions;
 
 namespace Dbx
 {
@@ -391,9 +392,22 @@ namespace Dbx
                         Console.WriteLine();
                     }
 
+                    string queryType = "query";
+                    string tableName = "data";
+
+                    var typeMatch = Regex.Match(Query, @"^\s*(\w+)", RegexOptions.IgnoreCase);
+                    if (typeMatch.Success)
+                        queryType = typeMatch.Groups[1].Value.ToLower();
+
+                    var tableMatch = Regex.Match(Query, @"from\s+(\w+)", RegexOptions.IgnoreCase);
+                    if (tableMatch.Success)
+                        tableName = tableMatch.Groups[1].Value.ToLower();
+
+                    string baseFileName = $"{tableName}_{queryType}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
+
                     if (exportJson)
                     {
-                        string jsonFile = $"export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json";
+                        string jsonFile = $"{baseFileName}.json";
                         string json = System.Text.Json.JsonSerializer.Serialize(Result, new 
                                       System.Text.Json.JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText(jsonFile, json);
@@ -402,7 +416,7 @@ namespace Dbx
 
                     if (exportCsv)
                     {
-                        string csvFile = $"export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+                        string csvFile = $"{baseFileName}.csv";
                         var csvLines = new List<string>();
                         if (Result.Count > 0)
                         {
