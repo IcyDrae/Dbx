@@ -563,24 +563,75 @@ WHERE TABLE_SCHEMA = DATABASE()
         {
             Console.WriteLine("Dbx - Commands:");
             Console.WriteLine();
+
             Console.WriteLine("config");
             Console.WriteLine("  Initialize the configuration file (creates ~/dbx-config/config.json if missing).");
             Console.WriteLine();
+
             Console.WriteLine("config add <connection-name> <database-type> <host> <port> <database> <user-name> <password>");
-            Console.WriteLine("  Add a connection with the parameters. Please use the parameters in order as described here.");
+            Console.WriteLine("  Add a connection with the parameters in order.");
             Console.WriteLine();
+
             Console.WriteLine("config list");
             Console.WriteLine("  List available connections in the configuration file.");
             Console.WriteLine();
+
             Console.WriteLine("connect <connection-name>");
             Console.WriteLine("  Connect to a named database from your config.");
             Console.WriteLine();
-            Console.WriteLine("help");
-            Console.WriteLine("  Show this help.");
+
+            Console.WriteLine("use <connection-name>");
+            Console.WriteLine("  Switch to a previously configured connection without reconnecting.");
             Console.WriteLine();
+
+            Console.WriteLine("tables");
+            Console.WriteLine("  List all tables in the currently connected database.");
+            Console.WriteLine();
+
+            Console.WriteLine("describe <table-name>");
+            Console.WriteLine("  Show columns, types, nullable, keys, and defaults for the specified table.");
+            Console.WriteLine();
+
+            Console.WriteLine("list <table-name> [--where=\"condition\"]");
+            Console.WriteLine("  Paginate and display rows from a table. Optional --where clause to filter rows.");
+            Console.WriteLine("  Example: dbx list users --where=\"first_name='Joe'\"");
+            Console.WriteLine();
+
+            Console.WriteLine("query \"SQL statement\" [--csv] [--json]");
+            Console.WriteLine("  Run a raw SQL query on the current database.");
+            Console.WriteLine("  Optional --csv or --json flags export the results to a file.");
+            Console.WriteLine("  Example: dbx query \"SELECT * FROM users\" --csv");
+            Console.WriteLine();
+
+            Console.WriteLine("history");
+            Console.WriteLine("  Show the list of previously executed queries in reverse order (newest first).");
+            Console.WriteLine();
+
+            Console.WriteLine("history <number>");
+            Console.WriteLine("  Re-run the query at the specified history position.");
+            Console.WriteLine("  Example: dbx history 2");
+            Console.WriteLine();
+
+            Console.WriteLine("visualize");
+            Console.WriteLine("  Display table relationships for the current database in CLI format.");
+            Console.WriteLine();
+
+            Console.WriteLine("help");
+            Console.WriteLine("  Show this help message.");
+            Console.WriteLine();
+
             Console.WriteLine("Examples:");
             Console.WriteLine("  dbx config");
+            Console.WriteLine("  dbx config add local-postgres postgres localhost 5432 mydb myuser mypassword");
             Console.WriteLine("  dbx connect local-postgres");
+            Console.WriteLine("  dbx use local-mysql");
+            Console.WriteLine("  dbx tables");
+            Console.WriteLine("  dbx describe users");
+            Console.WriteLine("  dbx list users --where=\"first_name='Joe'\"");
+            Console.WriteLine("  dbx query \"SELECT * FROM users\" --json");
+            Console.WriteLine("  dbx history");
+            Console.WriteLine("  dbx history 2");
+            Console.WriteLine("  dbx visualize");
         }
 
         private void SaveQueryToHistory(string Query)

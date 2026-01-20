@@ -18,8 +18,7 @@ The tool focuses on fast navigation, clean output, and developer productivity.
 - Run custom SQL queries
 - Export data to CSV / JSON
 - Visualize table relationships
-- Encrypted credential storage
-- Query history
+- Query history and run query from history
 
 * Motivation
 
